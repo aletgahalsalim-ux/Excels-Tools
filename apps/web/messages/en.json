@@ -1,0 +1,100 @@
+{
+  "app": {
+    "title": "AI Financial Document Intelligence Platform",
+    "tagline": "Upload your Excel financial models — we understand them, validate them, and generate professional reports.",
+    "logout": "Log out",
+    "login": "Log in",
+    "language": "العربية"
+  },
+  "landing": {
+    "heroTitle": "Turn your Excel financial models into professional reports — with AI that understands finance",
+    "heroSubtitle": "Upload your feasibility study, budget or financial statements. Our specialized agents understand the structure, validate it financially and logically, and generate a polished document in Arabic or English within minutes.",
+    "ctaPrimary": "Start free",
+    "ctaSecondary": "Log in",
+    "featuresTitle": "Why this platform?",
+    "features": {
+      "understand": { "title": "Deep structural understanding", "body": "Automatic detection of tables, headers, merged cells and the cross-sheet formula dependency graph — zero manual setup." },
+      "validate": { "title": "Rigorous financial validation", "body": "Balance-sheet balance, income-statement consistency, ratio sanity — customizable rules plus circular-reference and hardcoded-number detection." },
+      "agents": { "title": "Specialized AI agents", "body": "An agent per task — semantic classification, validation, anomaly explanation, executive summary — with a guard that blocks any number not present in your file." },
+      "bilingual": { "title": "Fully bilingual", "body": "Professional DOCX and HTML reports in Arabic (full RTL) or English, with a customizable visual identity." }
+    },
+    "stepsTitle": "Just three steps",
+    "steps": {
+      "upload": { "title": "Upload", "body": "Drag & drop your Excel file" },
+      "review": { "title": "Review", "body": "Watch detected tables and validation results live" },
+      "export": { "title": "Export", "body": "Download a delivery-ready professional report" }
+    },
+    "footer": "AI Financial Document Intelligence Platform"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Create account",
+    "continueWith": "or continue with",
+    "google": "Continue with Google",
+    "microsoft": "Continue with Microsoft",
+    "apple": "Continue with Apple",
+    "oauthError": "Social sign-in failed — try again or use email and password",
+    "finishing": "Finishing sign-in...",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "organization": "Organization name",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already have an account?",
+    "error": "Authentication failed — check your details"
+  },
+  "projects": {
+    "title": "Projects",
+    "create": "New project",
+    "name": "Project name",
+    "empty": "No projects yet — create your first one",
+    "open": "Open"
+  },
+  "files": {
+    "title": "Files",
+    "upload": "Upload Excel file",
+    "uploading": "Uploading...",
+    "empty": "No files yet — upload your first financial model",
+    "status": {
+      "uploaded": "Queued",
+      "analyzing": "Analyzing structure",
+      "analyzed": "Analysis complete",
+      "agents_running": "AI agents running",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "view": "View results"
+  },
+  "analysis": {
+    "sheets": "Sheets",
+    "tables": "Detected tables",
+    "range": "Range",
+    "rows": "Rows",
+    "type": "Classification",
+    "results": "Validation results",
+    "noResults": "No findings — the model passes all active rules.",
+    "severity": { "error": "Error", "warning": "Warning", "info": "Info" },
+    "location": "Location",
+    "message": "Finding",
+    "needsReview": "Needs human review",
+    "statementType": {
+      "balance_sheet": "Balance sheet",
+      "income_statement": "Income statement",
+      "cash_flow": "Cash flow",
+      "budget": "Budget",
+      "tax": "Tax",
+      "invoice": "Invoice",
+      "other": "Other"
+    }
+  },
+  "documents": {
+    "title": "Generate document",
+    "format": "Format",
+    "language": "Document language",
+    "arabic": "Arabic",
+    "english": "English",
+    "generate": "Generate",
+    "generating": "Generating...",
+    "download": "Download"
+  }
+}

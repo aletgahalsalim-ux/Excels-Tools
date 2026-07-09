@@ -1,0 +1,365 @@
+// AI Financial Document Intelligence Platform — full schema (build-order step 1).
+// Entity names follow the Ubiquitous Language: Workbook (UploadedFile), Sheet,
+// DetectedTable, ValidationResult, GeneratedDocument, Agent, Planner.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Identity & Organization ─────────────────────────
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now())
+  users     User[]
+  projects  Project[]
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  key         String       @unique // admin | manager | analyst | viewer
+  name        String
+  nameAr      String
+  permissions Permission[]
+  users       User[]
+}
+
+model Permission {
+  id     String @id @default(uuid())
+  roleId String
+  action String // e.g. "project:create", "file:upload", "document:generate", "config:write"
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, action])
+}
+
+model User {
+  id             String       @id @default(uuid())
+  email          String       @unique
+  name           String
+  /// Null for social-login accounts (google/microsoft/apple)
+  passwordHash   String?
+  /// local | google | microsoft | apple
+  authProvider   String       @default("local")
+  /// Subject (sub) claim from the OAuth provider's id_token
+  providerId     String?
+  avatarUrl      String?
+  organizationId String
+  roleId         String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  role           Role         @relation(fields: [roleId], references: [id])
+  uploadedFiles  UploadedFile[]
+  auditLogs      AuditLog[]
+  notifications  Notification[]
+
+  @@unique([authProvider, providerId])
+}
+
+// ───────────────────────── Projects & Workbooks ─────────────────────────
+
+model Project {
+  id             String         @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  createdAt      DateTime       @default(now())
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  uploadedFiles  UploadedFile[]
+
+  @@index([organizationId])
+}
+
+enum FileStatus {
+  uploaded
+  analyzing
+  analyzed
+  agents_running
+  completed
+  failed
+}
+
+/// A Workbook — the uploaded Excel file and the root of all analysis output.
+model UploadedFile {
+  id             String        @id @default(uuid())
+  projectId      String
+  uploadedById   String
+  fileName       String
+  storageKey     String // MinIO object key
+  sizeBytes      Int
+  status         FileStatus    @default(uploaded)
+  errorMessage   String?
+  /// Raw AnalysisResult JSON exactly as returned by the Excel Analysis Engine
+  analysisResult Json?
+  createdAt      DateTime      @default(now())
+  project        Project       @relation(fields: [projectId], references: [id])
+  uploadedBy     User          @relation(fields: [uploadedById], references: [id])
+  sheets         Sheet[]
+  namedRanges    NamedRange[]
+  formulas       Formula[]
+  validationResults ValidationResult[]
+  generatedDocuments GeneratedDocument[]
+  agentRuns      AgentRun[]
+
+  @@index([projectId, status])
+}
+
+model Sheet {
+  id             String         @id @default(uuid())
+  fileId         String
+  name           String
+  index          Int
+  visible        Boolean        @default(true)
+  maxRow         Int
+  maxColumn      Int
+  mergedCells    Json // string[] of A1 ranges
+  file           UploadedFile   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  detectedTables DetectedTable[]
+
+  @@unique([fileId, name])
+}
+
+model DetectedTable {
+  id            String   @id @default(uuid())
+  sheetId       String
+  /// Engine table id: `${sheetName}!${range}`
+  engineId      String
+  range         String
+  headerRow     Int?
+  headers       Json // string[]
+  rowCount      Int
+  columnCount   Int
+  numericRatio  Float
+  /// Data rows (capped) as returned by the engine
+  rows          Json
+  truncated     Boolean  @default(false)
+  /// Filled by Semantic Financial Analyzer
+  statementType String?
+  semanticInfo  Json?
+  sheet         Sheet    @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  fromRelationships TableRelationship[] @relation("fromTable")
+  toRelationships   TableRelationship[] @relation("toTable")
+
+  @@index([sheetId])
+}
+
+model TableRelationship {
+  id          String        @id @default(uuid())
+  fromTableId String
+  toTableId   String
+  kind        String // e.g. "cross_sheet_reference"
+  detail      String?
+  fromTable   DetectedTable @relation("fromTable", fields: [fromTableId], references: [id], onDelete: Cascade)
+  toTable     DetectedTable @relation("toTable", fields: [toTableId], references: [id], onDelete: Cascade)
+}
+
+model NamedRange {
+  id     String       @id @default(uuid())
+  fileId String
+  name   String
+  target String
+  file   UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+}
+
+model Formula {
+  id             String       @id @default(uuid())
+  fileId         String
+  sheetName      String
+  cell           String
+  formula        String
+  localRefs      Json // string[]
+  crossSheetRefs Json // string[]
+  file           UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId, sheetName])
+}
+
+enum Severity {
+  error
+  warning
+  info
+}
+
+enum ValidationSource {
+  engine
+  agent
+}
+
+model ValidationResult {
+  id          String           @id @default(uuid())
+  fileId      String
+  ruleKey     String
+  severity    Severity
+  sheetName   String?
+  cell        String?
+  message     String
+  messageAr   String
+  source      ValidationSource
+  /// True when the AI Output Validator could not fully verify the agent output
+  needsReview Boolean          @default(false)
+  agentRunId  String?
+  createdAt   DateTime         @default(now())
+  file        UploadedFile     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  agentRun    AgentRun?        @relation(fields: [agentRunId], references: [id])
+
+  @@index([fileId, severity])
+}
+
+// ───────────────────────── Generated Documents ─────────────────────────
+
+enum DocFormat {
+  docx
+  html
+}
+
+enum Language {
+  ar
+  en
+}
+
+model GeneratedDocument {
+  id        String            @id @default(uuid())
+  fileId    String
+  format    DocFormat
+  language  Language
+  createdAt DateTime          @default(now())
+  file      UploadedFile      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  versions  DocumentVersion[]
+
+  @@unique([fileId, format, language])
+}
+
+model DocumentVersion {
+  id         String            @id @default(uuid())
+  documentId String
+  version    Int
+  storageKey String
+  sizeBytes  Int
+  createdAt  DateTime          @default(now())
+  document   GeneratedDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+}
+
+// ───────────────────────── Audit & Notifications ─────────────────────────
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String // login | upload | analyze | generate | export | delete ...
+  entity    String?
+  entityId  String?
+  detail    Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  titleAr   String
+  body      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ───────────────────────── AI Layer ─────────────────────────
+
+/// Agent Registry (doc 5.2): all 12 agents are registered; only MVP agents are active.
+model AgentDefinition {
+  id           String   @id @default(uuid())
+  key          String   @unique // AgentKey from @afdip/shared
+  version      String   @default("1.0.0")
+  name         String
+  description  String
+  /// [MVP] | [Phase 2] | [Phase 3]
+  scopeTag     String
+  active       Boolean  @default(false)
+  /// Which agents this one depends on (array of agent keys)
+  dependencies Json
+  /// Queryable capabilities
+  capabilities Json
+  /// { provider: "anthropic", model: "claude-sonnet-5", maxTokens }
+  modelConfig  Json
+  prompts      PromptTemplate[]
+  runs         AgentRun[]
+}
+
+/// Prompt Management (doc 5.6): prompts live here, versioned — never in code.
+model PromptTemplate {
+  id             String          @id @default(uuid())
+  agentId        String
+  version        Int
+  systemPrompt   String
+  /// JSON Schema the agent's response MUST match (enforced by Output Validator)
+  responseSchema Json
+  isActive       Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  agent          AgentDefinition @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, version])
+}
+
+enum AgentRunStatus {
+  running
+  succeeded
+  failed
+  needs_review
+}
+
+/// Agent Monitoring & Cost Observability (doc 5.3)
+model AgentRun {
+  id           String          @id @default(uuid())
+  agentId      String
+  fileId       String
+  status       AgentRunStatus  @default(running)
+  promptVersion Int?
+  provider     String?
+  model        String?
+  inputTokens  Int             @default(0)
+  outputTokens Int             @default(0)
+  costUsd      Float           @default(0)
+  latencyMs    Int             @default(0)
+  retries      Int             @default(0)
+  output       Json?
+  errorMessage String?
+  createdAt    DateTime        @default(now())
+  agent        AgentDefinition @relation(fields: [agentId], references: [id])
+  file         UploadedFile    @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  validationResults ValidationResult[]
+
+  @@index([fileId])
+  @@index([agentId, createdAt])
+}
+
+/// Configuration Management (doc 11.7): runtime-changeable settings, never constants.
+model AppConfig {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+/// Rules Engine (doc 5.9): validation/formatting/export rules live here, not in code.
+model Rule {
+  id         String   @id @default(uuid())
+  ruleKey    String   @unique
+  ruleType   String // validation | formatting | translation | naming | export
+  name       String
+  nameAr     String
+  /// Declarative rule definition consumed by the Rules Engine evaluator
+  definition Json
+  severity   Severity @default(warning)
+  version    Int      @default(1)
+  active     Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
+}

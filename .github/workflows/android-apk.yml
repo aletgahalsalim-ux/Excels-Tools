@@ -1,0 +1,61 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: 'Public API URL baked into the app'
+        required: false
+        default: 'http://localhost:3001'
+
+jobs:
+  build-apk:
+    name: Build installable APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: npm ci
+
+      - name: Expo prebuild (generate android project)
+        working-directory: apps/mobile
+        env:
+          EXPO_PUBLIC_API_URL: ${{ github.event.inputs.api_url }}
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Gradle build (release APK, debug-signed)
+        working-directory: apps/mobile/android
+        env:
+          EXPO_PUBLIC_API_URL: ${{ github.event.inputs.api_url }}
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Rename APK
+        run: cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk afdip-android.apk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: afdip-android-apk
+          path: afdip-android.apk
+
+      - name: Publish GitHub Release with APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-build-${{ github.run_number }}
+          name: 'AFDIP Android APK (build ${{ github.run_number }})'
+          body: |
+            تطبيق أندرويد قابل للتثبيت مباشرة (موقّع بمفتاح تطوير — للتجربة والتوزيع الداخلي).
+            Installable Android APK (debug-signed — for testing/internal distribution).
+
+            API URL baked in: `${{ github.event.inputs.api_url }}`
+          files: afdip-android.apk

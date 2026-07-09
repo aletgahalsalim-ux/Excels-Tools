@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "AFDIP — تحليل المستندات المالية",
+    "slug": "afdip",
+    "version": "0.1.0",
+    "scheme": "afdip",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": ["ios", "android"],
+    "ios": {
+      "bundleIdentifier": "com.afdip.app",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.afdip.app"
+    },
+    "extra": {
+      "apiUrl": "http://localhost:3001"
+    },
+    "plugins": ["expo-router", "expo-secure-store"]
+  }
+}
