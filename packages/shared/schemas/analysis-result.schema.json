@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "afdip:analysis-result",
+  "title": "AnalysisResult",
+  "type": "object",
+  "required": ["engineVersion", "workbook", "sheets", "formulas", "anomalies", "stats"],
+  "additionalProperties": false,
+  "properties": {
+    "engineVersion": { "type": "string" },
+    "workbook": {
+      "type": "object",
+      "required": ["fileName", "sheetCount", "namedRanges"],
+      "additionalProperties": false,
+      "properties": {
+        "fileName": { "type": "string" },
+        "sheetCount": { "type": "integer", "minimum": 0 },
+        "namedRanges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "target"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "target": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "sheets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "index",
+          "visible",
+          "maxRow",
+          "maxColumn",
+          "mergedCells",
+          "detectedTables"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "index": { "type": "integer", "minimum": 0 },
+          "visible": { "type": "boolean" },
+          "maxRow": { "type": "integer", "minimum": 0 },
+          "maxColumn": { "type": "integer", "minimum": 0 },
+          "mergedCells": { "type": "array", "items": { "type": "string" } },
+          "detectedTables": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/detectedTable" }
+          }
+        }
+      }
+    },
+    "formulas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sheetName", "cell", "formula", "localRefs", "crossSheetRefs"],
+        "additionalProperties": false,
+        "properties": {
+          "sheetName": { "type": "string" },
+          "cell": { "type": "string" },
+          "formula": { "type": "string" },
+          "localRefs": { "type": "array", "items": { "type": "string" } },
+          "crossSheetRefs": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "anomalies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "sheetName", "cell", "detail"],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["circular_reference", "hardcoded_number", "broken_reference", "dead_formula"]
+          },
+          "sheetName": { "type": "string" },
+          "cell": { "type": "string" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": ["totalCells", "totalFormulas", "totalDetectedTables"],
+      "additionalProperties": false,
+      "properties": {
+        "totalCells": { "type": "integer", "minimum": 0 },
+        "totalFormulas": { "type": "integer", "minimum": 0 },
+        "totalDetectedTables": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "definitions": {
+    "detectedTable": {
+      "type": "object",
+      "required": [
+        "id",
+        "sheetName",
+        "range",
+        "headerRow",
+        "headers",
+        "rowCount",
+        "columnCount",
+        "numericRatio",
+        "rows",
+        "truncated"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "sheetName": { "type": "string" },
+        "range": { "type": "string" },
+        "headerRow": { "type": ["integer", "null"], "minimum": 1 },
+        "headers": { "type": "array", "items": { "type": "string" } },
+        "rowCount": { "type": "integer", "minimum": 0 },
+        "columnCount": { "type": "integer", "minimum": 0 },
+        "numericRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": ["string", "number", "boolean", "null"] }
+          }
+        },
+        "truncated": { "type": "boolean" }
+      }
+    }
+  }
+}

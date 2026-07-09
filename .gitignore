@@ -1,0 +1,28 @@
+# Node
+node_modules/
+dist/
+.next/
+*.tsbuildinfo
+coverage/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.mypy_cache/
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+
+# Storage / generated
+storage/
+*.docx
+!tests/fixtures/**/*.docx
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

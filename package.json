@@ -1,0 +1,25 @@
+{
+  "name": "ai-financial-document-intelligence-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI Financial Document Intelligence Platform — SaaS for understanding, validating and documenting complex financial Excel models via specialized AI agents",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build -w packages/shared && npm run build -w apps/api && npm run build -w apps/web",
+    "test": "npm run test -w packages/shared --if-present && npm run test -w apps/api",
+    "lint": "npm run lint -w apps/api --if-present && npm run lint -w apps/web --if-present",
+    "db:migrate": "npm run db:migrate -w apps/api",
+    "db:seed": "npm run db:seed -w apps/api",
+    "dev:api": "npm run start:dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}
