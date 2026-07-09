@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import type { ValidationResultDto } from '@afdip/shared';
 import { api, API_BASE, getToken } from '@/api';
