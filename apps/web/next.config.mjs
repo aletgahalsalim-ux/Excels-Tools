@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@afdip/shared'],
+  output: 'standalone',
 };
 
 export default withNextIntl(nextConfig);

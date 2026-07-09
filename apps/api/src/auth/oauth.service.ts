@@ -94,9 +94,12 @@ export class OAuthService {
   }
 
   /** Build the provider authorization URL with a signed short-lived state. */
-  authorizationUrl(provider: OAuthProviderKey, locale: string): string {
+  authorizationUrl(provider: OAuthProviderKey, locale: string, client: 'web' | 'mobile' = 'web'): string {
     const cfg = this.config(provider);
-    const state = this.jwt.sign({ p: provider, l: locale, t: 'oauth-state' }, { expiresIn: '10m' });
+    const state = this.jwt.sign(
+      { p: provider, l: locale, c: client, t: 'oauth-state' },
+      { expiresIn: '10m' },
+    );
     const params = new URLSearchParams({
       client_id: cfg.clientId,
       redirect_uri: this.redirectUri(provider),
@@ -114,8 +117,8 @@ export class OAuthService {
     code: string,
     state: string,
     appleUserJson?: string,
-  ): Promise<{ auth: AuthResponseDto; locale: string }> {
-    let statePayload: { p: string; l: string; t: string };
+  ): Promise<{ auth: AuthResponseDto; locale: string; client: 'web' | 'mobile' }> {
+    let statePayload: { p: string; l: string; c?: string; t: string };
     try {
       statePayload = this.jwt.verify(state);
     } catch {
@@ -139,7 +142,11 @@ export class OAuthService {
     }
 
     const auth = await this.findOrCreateUser(provider, claims);
-    return { auth, locale: statePayload.l === 'en' ? 'en' : 'ar' };
+    return {
+      auth,
+      locale: statePayload.l === 'en' ? 'en' : 'ar',
+      client: statePayload.c === 'mobile' ? 'mobile' : 'web',
+    };
   }
 
   private async exchangeCode(provider: OAuthProviderKey, code: string): Promise<IdTokenClaims> {

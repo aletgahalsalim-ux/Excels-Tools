@@ -1,0 +1,96 @@
+# Production stack — one VM/host with Docker is enough:
+#   cp .env.example .env   (fill secrets: JWT_SECRET, ANTHROPIC_API_KEY, OAuth keys, PUBLIC_* urls)
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Put a TLS reverse proxy (Caddy/Nginx/Traefik) or a cloud load balancer in
+# front of web:3000 and api:3001, then set the PUBLIC_* env vars to those URLs.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: afdip
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-afdip_change_me}
+      POSTGRES_DB: afdip
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U afdip']
+      interval: 10s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-afdip}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-afdip_change_me}
+    volumes:
+      - miniodata:/data
+
+  excel-analyzer:
+    build: ./services/excel-analyzer
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://afdip:${POSTGRES_PASSWORD:-afdip_change_me}@postgres:5432/afdip
+      REDIS_URL: redis://redis:6379
+      EXCEL_ANALYZER_URL: http://excel-analyzer:8100
+      STORAGE_DRIVER: s3
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-afdip}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-afdip_change_me}
+      S3_BUCKET: afdip-files
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      AI_PROVIDER: ${AI_PROVIDER:-anthropic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      API_PORT: '3001'
+      # public URLs (behind your TLS proxy)
+      API_PUBLIC_URL: ${API_PUBLIC_URL:?set API_PUBLIC_URL}
+      WEB_ORIGIN: ${WEB_ORIGIN:?set WEB_ORIGIN}
+      # social login (optional — a provider activates when its keys are set)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
+      APPLE_TEAM_ID: ${APPLE_TEAM_ID:-}
+      APPLE_KEY_ID: ${APPLE_KEY_ID:-}
+      APPLE_PRIVATE_KEY: ${APPLE_PRIVATE_KEY:-}
+    ports:
+      - '3001:3001'
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${API_PUBLIC_URL:?set API_PUBLIC_URL}
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - '3000:3000'
+
+volumes:
+  pgdata:
+  miniodata:

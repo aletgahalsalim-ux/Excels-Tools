@@ -41,9 +41,16 @@ export class OAuthController {
   start(
     @Param('provider') provider: string,
     @Query('locale') locale = 'ar',
+    @Query('client') client = 'web',
     @Res() res: Response,
   ): void {
-    res.redirect(this.oauth.authorizationUrl(assertProvider(provider), locale));
+    res.redirect(
+      this.oauth.authorizationUrl(
+        assertProvider(provider),
+        locale,
+        client === 'mobile' ? 'mobile' : 'web',
+      ),
+    );
   }
 
   /** Google & Microsoft return via GET redirect. */
@@ -84,11 +91,21 @@ export class OAuthController {
       return;
     }
     try {
-      const { auth, locale } = await this.oauth.handleCallback(provider, code, state, appleUserJson);
-      await this.audit.log(auth.user.id, 'login', 'user', auth.user.id, { provider });
+      const { auth, locale, client } = await this.oauth.handleCallback(
+        provider,
+        code,
+        state,
+        appleUserJson,
+      );
+      await this.audit.log(auth.user.id, 'login', 'user', auth.user.id, { provider, client });
       const payload = Buffer.from(JSON.stringify(auth)).toString('base64url');
-      // token travels in the URL fragment — never sent to any server
-      res.redirect(`${webUrl}/${locale}/auth/callback#session=${payload}`);
+      // token travels in the URL fragment — never sent to any server.
+      // Mobile clients get the app deep link (afdip://) instead of the web callback.
+      res.redirect(
+        client === 'mobile'
+          ? `afdip://auth#session=${payload}`
+          : `${webUrl}/${locale}/auth/callback#session=${payload}`,
+      );
     } catch {
       res.redirect(`${webUrl}/ar/auth?error=oauth_failed`);
     }

@@ -19,6 +19,7 @@ npm-workspaces monorepo, three runtimes:
   - `prisma/seed-data/` — agent registry, versioned prompts, validation rules, runtime config. **Prompts and rules live in the DB, never in code.**
 - **`services/excel-analyzer`** — Python 3.12 FastAPI + openpyxl. Deterministic engine: table detection (flood fill + header heuristics), merged cells, formula dependency graph, anomaly detection (circular/hardcoded/broken/dead). Contract: `packages/shared/schemas/analysis-result.schema.json`.
 - **`apps/web`** — Next.js App Router + next-intl. Arabic RTL is the default locale.
+- **`apps/mobile`** — Expo/React Native (Android+iOS), expo-router. Same REST API + `@afdip/shared`; social login via `?client=mobile` → `afdip://auth` deep link. Typecheck: `npm run typecheck -w apps/mobile`. Deploy/stores: `docs/deployment.md`.
 - **`packages/shared`** — TS types + JSON Schemas shared across all three. Change the contract here first.
 
 ## Commands

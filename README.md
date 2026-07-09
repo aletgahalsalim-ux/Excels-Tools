@@ -14,7 +14,8 @@ Upload `.xlsx` → structure analysis (tables, headers, merged cells, formula de
 |---|---|
 | API | NestJS · Prisma · PostgreSQL · BullMQ/Redis |
 | Excel Analysis Engine | Python 3.12 · FastAPI · openpyxl |
-| Frontend | Next.js (App Router) · next-intl (ar RTL default / en) |
+| Frontend (web) | Next.js (App Router) · next-intl (ar RTL default / en) |
+| Mobile (Android + iOS) | Expo / React Native (`apps/mobile`) — same API + shared types |
 | AI layer | Anthropic Claude behind a multi-provider interface (+ deterministic mock) |
 | Storage | MinIO/S3 or local filesystem (`STORAGE_DRIVER`) |
 
@@ -63,6 +64,24 @@ npm test -w apps/api                                  # Jest — AI layer unit t
 cd services/excel-analyzer && .venv/bin/python -m pytest   # engine tests
 ./scripts/e2e-smoke.sh                                # full end-to-end (services must be up)
 ```
+
+## Mobile apps
+
+```bash
+cd apps/mobile
+npm run start      # scan the QR with the Expo Go app (Android/iOS)
+```
+
+Store builds and submission via EAS — see `docs/deployment.md` §2.
+
+## Production deployment
+
+```bash
+cp .env.example .env   # fill secrets + public URLs
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Full guide (TLS, OAuth redirect URIs, managed alternatives, store publishing): `docs/deployment.md`.
 
 ## Documentation
 
