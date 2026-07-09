@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 export default async function LandingPage({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const t = await getTranslations('landing');
   const features = ['understand', 'validate', 'agents', 'bilingual'] as const;
   const steps = ['upload', 'review', 'export'] as const;
