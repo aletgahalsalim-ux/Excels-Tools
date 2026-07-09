@@ -1,0 +1,10 @@
+# TLS reverse proxy — replace your-domain.com (deploy-server.sh does this for you).
+# Caddy obtains and renews free HTTPS certificates automatically.
+
+app.your-domain.com {
+	reverse_proxy localhost:3000
+}
+
+api.your-domain.com {
+	reverse_proxy localhost:3001
+}
