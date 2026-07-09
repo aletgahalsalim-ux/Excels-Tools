@@ -1,0 +1,73 @@
+{
+  "app": {
+    "title": "AI Financial Document Intelligence Platform",
+    "tagline": "Upload your Excel financial models — we understand them, validate them, and generate professional reports.",
+    "logout": "Log out",
+    "language": "العربية"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "organization": "Organization name",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already have an account?",
+    "error": "Authentication failed — check your details"
+  },
+  "projects": {
+    "title": "Projects",
+    "create": "New project",
+    "name": "Project name",
+    "empty": "No projects yet — create your first one",
+    "open": "Open"
+  },
+  "files": {
+    "title": "Files",
+    "upload": "Upload Excel file",
+    "uploading": "Uploading...",
+    "empty": "No files yet — upload your first financial model",
+    "status": {
+      "uploaded": "Queued",
+      "analyzing": "Analyzing structure",
+      "analyzed": "Analysis complete",
+      "agents_running": "AI agents running",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "view": "View results"
+  },
+  "analysis": {
+    "sheets": "Sheets",
+    "tables": "Detected tables",
+    "range": "Range",
+    "rows": "Rows",
+    "type": "Classification",
+    "results": "Validation results",
+    "noResults": "No findings — the model passes all active rules.",
+    "severity": { "error": "Error", "warning": "Warning", "info": "Info" },
+    "location": "Location",
+    "message": "Finding",
+    "needsReview": "Needs human review",
+    "statementType": {
+      "balance_sheet": "Balance sheet",
+      "income_statement": "Income statement",
+      "cash_flow": "Cash flow",
+      "budget": "Budget",
+      "tax": "Tax",
+      "invoice": "Invoice",
+      "other": "Other"
+    }
+  },
+  "documents": {
+    "title": "Generate document",
+    "format": "Format",
+    "language": "Document language",
+    "arabic": "Arabic",
+    "english": "English",
+    "generate": "Generate",
+    "generating": "Generating...",
+    "download": "Download"
+  }
+}
