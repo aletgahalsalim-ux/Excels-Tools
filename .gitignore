@@ -17,8 +17,8 @@ __pycache__/
 .env.local
 .env.*.local
 
-# Storage / generated
-storage/
+# Local file-storage directory (repo root only — NOT source dirs like src/storage)
+/storage/
 *.docx
 !tests/fixtures/**/*.docx
 
