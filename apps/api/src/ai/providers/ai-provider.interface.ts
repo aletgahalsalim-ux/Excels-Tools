@@ -9,7 +9,8 @@ export interface AiCompletionRequest {
   system: string;
   userMessage: string;
   maxTokens: number;
-  temperature: number;
+  /** When set, providers that support structured outputs constrain the response to this JSON Schema */
+  responseSchema?: object;
   /** Passed through to providers that need context (MockProvider derives deterministic output from it) */
   metadata?: { agentKey?: string; payload?: unknown };
 }

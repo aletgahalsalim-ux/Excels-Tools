@@ -13,10 +13,11 @@ interface AgentSeed {
   active: boolean;
   dependencies: string[];
   capabilities: string[];
-  modelConfig: { provider: string; model: string; maxTokens: number; temperature: number };
+  modelConfig: { provider: string; model: string; maxTokens: number };
 }
 
-const DEFAULT_MODEL = { provider: 'anthropic', model: 'claude-sonnet-5', maxTokens: 4096, temperature: 0 };
+// temperature is intentionally absent: removed from the API on claude-sonnet-5 / opus-4.7+
+const DEFAULT_MODEL = { provider: 'anthropic', model: 'claude-sonnet-5', maxTokens: 4096 };
 
 export const AGENTS: AgentSeed[] = [
   {

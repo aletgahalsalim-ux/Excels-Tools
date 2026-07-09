@@ -49,7 +49,6 @@ export class AgentRunnerService {
     const modelConfig = agent.modelConfig as {
       model: string;
       maxTokens: number;
-      temperature: number;
     };
 
     const run = await this.prisma.agentRun.create({
@@ -75,12 +74,18 @@ export class AgentRunnerService {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       retries = attempt;
       try {
+        // Fallback prompt (doc 5.6): a retry carries the validator's feedback
+        // instead of resending the identical request verbatim.
+        const feedback =
+          attempt > 0 && problems.length
+            ? `\n\nYour previous response was rejected by the output validator for these reasons: ${problems.join('; ')}. Correct these issues and respond again, strictly following the schema and citing only numbers that appear in the input data.`
+            : '';
         const response = await this.provider.complete({
           model: modelConfig.model,
           system: prompt.systemPrompt,
-          userMessage: JSON.stringify(payload),
+          userMessage: JSON.stringify(payload) + feedback,
           maxTokens: modelConfig.maxTokens,
-          temperature: modelConfig.temperature,
+          responseSchema: prompt.responseSchema as object,
           metadata: { agentKey, payload },
         });
         inputTokens += response.inputTokens;

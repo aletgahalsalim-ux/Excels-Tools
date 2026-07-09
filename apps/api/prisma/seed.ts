@@ -116,9 +116,15 @@ async function main(): Promise<void> {
     });
   }
 
-  // Prompt templates (versioned, active v1)
+  // Prompt templates (versioned; activating a version deactivates the others)
   for (const p of PROMPTS) {
     const agent = await prisma.agentDefinition.findUniqueOrThrow({ where: { key: p.agentKey } });
+    if (p.isActive) {
+      await prisma.promptTemplate.updateMany({
+        where: { agentId: agent.id, version: { not: p.version } },
+        data: { isActive: false },
+      });
+    }
     await prisma.promptTemplate.upsert({
       where: { agentId_version: { agentId: agent.id, version: p.version } },
       update: {

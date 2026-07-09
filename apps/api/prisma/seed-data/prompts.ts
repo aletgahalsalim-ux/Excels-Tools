@@ -70,8 +70,11 @@ ${STRICT_JSON_RULES}`,
     },
   },
   {
+    // v2: `evidence` moved before message/messageAr in the required order —
+    // constrained decoding generates fields in schema order, so the model
+    // extracts the source numbers first and then writes the narrative.
     agentKey: 'financial-validation-engine',
-    version: 1,
+    version: 2,
     isActive: true,
     systemPrompt: `You are the Financial Validation Engine agent of the AI Financial Document Intelligence Platform.
 
@@ -95,7 +98,7 @@ ${STRICT_JSON_RULES}`,
           type: 'array',
           items: {
             type: 'object',
-            required: ['ruleKey', 'severity', 'tableId', 'sheetName', 'cell', 'message', 'messageAr', 'evidence'],
+            required: ['ruleKey', 'severity', 'tableId', 'sheetName', 'cell', 'evidence', 'message', 'messageAr'],
             additionalProperties: false,
             properties: {
               ruleKey: { type: 'string' },
@@ -103,9 +106,9 @@ ${STRICT_JSON_RULES}`,
               tableId: { type: ['string', 'null'] },
               sheetName: { type: ['string', 'null'] },
               cell: { type: ['string', 'null'] },
+              evidence: { type: 'array', items: { type: 'number' } },
               message: { type: 'string' },
               messageAr: { type: 'string' },
-              evidence: { type: 'array', items: { type: 'number' } },
             },
           },
         },

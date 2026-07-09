@@ -5,7 +5,6 @@ const request = (agentKey: string, payload: unknown) => ({
   system: '',
   userMessage: JSON.stringify(payload),
   maxTokens: 1024,
-  temperature: 0,
   metadata: { agentKey, payload },
 });
 
