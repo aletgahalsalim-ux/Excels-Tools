@@ -43,7 +43,13 @@ model User {
   id             String       @id @default(uuid())
   email          String       @unique
   name           String
-  passwordHash   String
+  /// Null for social-login accounts (google/microsoft/apple)
+  passwordHash   String?
+  /// local | google | microsoft | apple
+  authProvider   String       @default("local")
+  /// Subject (sub) claim from the OAuth provider's id_token
+  providerId     String?
+  avatarUrl      String?
   organizationId String
   roleId         String
   createdAt      DateTime     @default(now())
@@ -52,6 +58,8 @@ model User {
   uploadedFiles  UploadedFile[]
   auditLogs      AuditLog[]
   notifications  Notification[]
+
+  @@unique([authProvider, providerId])
 }
 
 // ───────────────────────── Projects & Workbooks ─────────────────────────

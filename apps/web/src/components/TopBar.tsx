@@ -21,6 +21,7 @@ export function TopBar({ title, locale }: { title: string; locale: string }) {
       <h1>{title}</h1>
       <div className="actions">
         <a href={switched}>{t('language')}</a>
+        {!authed && <a href={`/${locale}/auth`}>{t('login')}</a>}
         {authed && (
           <button
             onClick={() => {

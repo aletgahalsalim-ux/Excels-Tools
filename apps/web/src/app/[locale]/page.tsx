@@ -1,70 +1,56 @@
-'use client';
+import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
-import { useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { api, setSession } from '@/lib/api';
-
-export default function AuthPage() {
-  const t = useTranslations();
-  const router = useRouter();
-  const { locale } = useParams<{ locale: string }>();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [form, setForm] = useState({ email: '', password: '', name: '', organizationName: '' });
-
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm({ ...form, [k]: e.target.value });
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError('');
-    try {
-      const auth =
-        mode === 'login'
-          ? await api.login({ email: form.email, password: form.password })
-          : await api.register(form);
-      setSession(auth);
-      router.push(`/${locale}/projects`);
-    } catch {
-      setError(t('auth.error'));
-    } finally {
-      setBusy(false);
-    }
-  };
+export default async function LandingPage({
+  params: { locale },
+}: {
+  params: { locale: string };
+}) {
+  const t = await getTranslations('landing');
+  const features = ['understand', 'validate', 'agents', 'bilingual'] as const;
+  const steps = ['upload', 'review', 'export'] as const;
 
   return (
-    <div className="card" style={{ maxWidth: 440, margin: '3rem auto' }}>
-      <h2>{mode === 'login' ? t('auth.login') : t('auth.register')}</h2>
-      <p className="muted">{t('app.tagline')}</p>
-      <form onSubmit={submit}>
-        {mode === 'register' && (
-          <>
-            <label>{t('auth.name')}</label>
-            <input value={form.name} onChange={set('name')} required />
-            <label>{t('auth.organization')}</label>
-            <input value={form.organizationName} onChange={set('organizationName')} required />
-          </>
-        )}
-        <label>{t('auth.email')}</label>
-        <input type="email" value={form.email} onChange={set('email')} required />
-        <label>{t('auth.password')}</label>
-        <input type="password" value={form.password} onChange={set('password')} required minLength={8} />
-        {error && <p className="error-text">{error}</p>}
-        <button className="primary" disabled={busy} type="submit">
-          {mode === 'login' ? t('auth.login') : t('auth.register')}
-        </button>
-      </form>
-      <p style={{ marginTop: '1rem' }}>
-        <span className="muted">
-          {mode === 'login' ? t('auth.noAccount') : t('auth.haveAccount')}{' '}
-        </span>
-        <button className="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
-          {mode === 'login' ? t('auth.register') : t('auth.login')}
-        </button>
-      </p>
+    <div className="landing">
+      <section className="hero">
+        <h1>{t('heroTitle')}</h1>
+        <p>{t('heroSubtitle')}</p>
+        <div className="hero-cta">
+          <Link className="btn-hero primary" href={`/${locale}/auth?mode=register`}>
+            {t('ctaPrimary')}
+          </Link>
+          <Link className="btn-hero" href={`/${locale}/auth`}>
+            {t('ctaSecondary')}
+          </Link>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="section-title">{t('featuresTitle')}</h2>
+        <div className="features">
+          {features.map((key) => (
+            <div className="feature" key={key}>
+              <h3>{t(`features.${key}.title`)}</h3>
+              <p>{t(`features.${key}.body`)}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="section-title">{t('stepsTitle')}</h2>
+        <div className="steps">
+          {steps.map((key, i) => (
+            <div className="step" key={key}>
+              <span className="step-num">{i + 1}</span>
+              <h3>{t(`steps.${key}.title`)}</h3>
+              <p>{t(`steps.${key}.body`)}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="landing-footer">© {new Date().getFullYear()} — {t('footer')}</footer>
     </div>
   );
 }

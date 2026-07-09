@@ -42,6 +42,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
+  providers: () =>
+    request<{ google: boolean; microsoft: boolean; apple: boolean }>('/auth/providers'),
+
   register: (input: { email: string; password: string; name: string; organizationName: string }) =>
     request<AuthResponseDto>('/auth/register', { method: 'POST', body: JSON.stringify(input) }),
 

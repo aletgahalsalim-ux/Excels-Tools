@@ -44,6 +44,18 @@ npm run dev:web       # http://localhost:3000 (redirects to /ar)
 
 Set `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` for real agent runs; the default `mock` provider runs the entire pipeline deterministically without a key.
 
+## Social login (Google / Microsoft / Apple)
+
+Email/password accounts work out of the box. Each social provider activates automatically once its credentials are set in `.env` (see `.env.example` for the exact redirect URIs to register):
+
+| Provider | Where to create credentials | Env vars |
+|---|---|---|
+| Google | [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) — OAuth client (Web) | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| Microsoft | [Azure Portal → App registrations](https://portal.azure.com) — any org + personal accounts | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` |
+| Apple | [Apple Developer → Certificates, IDs & Profiles](https://developer.apple.com) — Services ID + Sign in with Apple key (paid account; HTTPS return URL required) | `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` |
+
+The login page shows a button only for configured providers (`GET /api/v1/auth/providers`). A social account with an email matching an existing local account is linked to it automatically.
+
 ## Tests
 
 ```bash

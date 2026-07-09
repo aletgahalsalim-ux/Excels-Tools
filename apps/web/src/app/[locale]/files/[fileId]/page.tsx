@@ -21,7 +21,7 @@ export default function FileResultsPage() {
 
   useEffect(() => {
     if (!getToken()) {
-      router.push(`/${locale}`);
+      router.push(`/${locale}/auth`);
       return;
     }
     api.fileDetails(fileId).then(setDetails).catch(() => router.push(`/${locale}/projects`));

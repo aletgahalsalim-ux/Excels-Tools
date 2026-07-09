@@ -19,12 +19,12 @@ export default function ProjectFilesPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(() => {
-    api.listFiles(projectId).then(setFiles).catch(() => router.push(`/${locale}`));
+    api.listFiles(projectId).then(setFiles).catch(() => router.push(`/${locale}/auth`));
   }, [projectId, locale, router]);
 
   useEffect(() => {
     if (!getToken()) {
-      router.push(`/${locale}`);
+      router.push(`/${locale}/auth`);
       return;
     }
     refresh();

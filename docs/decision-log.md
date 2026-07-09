@@ -15,3 +15,4 @@
 | D-011 | تصدير MVP: DOCX + HTML فقط؛ PDF/PPTX ← [Phase 2] | نطاق MVP | 2026-07-09 |
 | D-012 | مؤجل إلى [Phase 2/3]: الوكلاء 7-11، Workflow/Approvals الكامل، Integration Hub، Event Architecture، Agent Memory طويل الأمد، Multi-provider fallback فعلي، Knowledge Graph [Phase 3] | نطاق MVP | 2026-07-09 |
 | D-013 | فحص الـ Hallucination يقتصر على الحقول المالية المعلنة (`evidence`, `keyFigures.value`) وليس كل رقم في الاستجابة (درجات الثقة والعدادات بنيوية) | قرار هندسي | 2026-07-09 |
+| D-014 | الدخول الاجتماعي (Google/Microsoft/Apple) يُنفَّذ OIDC مباشرة داخل الـ API بلا خدمة مصادقة خارجية؛ كل مزود يتفعّل تلقائياً عند وجود مفاتيحه في الإعدادات، وحسابات المزودين تُربط بالحساب المحلي عند تطابق البريد | طلب المالك | 2026-07-09 |

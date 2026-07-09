@@ -42,7 +42,7 @@ export class AuthService {
       },
       include: { role: true },
     });
-    return this.toAuthResponse(user.id, user.email, user.name, user.role.key, org.id);
+    return this.issueToken(user.id, user.email, user.name, user.role.key, org.id);
   }
 
   async login(email: string, password: string): Promise<AuthResponseDto> {
@@ -50,10 +50,10 @@ export class AuthService {
       where: { email },
       include: { role: true },
     });
-    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    if (!user?.passwordHash || !(await bcrypt.compare(password, user.passwordHash))) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.toAuthResponse(
+    return this.issueToken(
       user.id,
       user.email,
       user.name,
@@ -62,7 +62,7 @@ export class AuthService {
     );
   }
 
-  private toAuthResponse(
+  issueToken(
     id: string,
     email: string,
     name: string,

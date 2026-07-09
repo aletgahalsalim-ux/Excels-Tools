@@ -17,10 +17,10 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     if (!getToken()) {
-      router.push(`/${locale}`);
+      router.push(`/${locale}/auth`);
       return;
     }
-    api.listProjects().then(setProjects).catch(() => router.push(`/${locale}`));
+    api.listProjects().then(setProjects).catch(() => router.push(`/${locale}/auth`));
   }, [locale, router]);
 
   const create = async (e: React.FormEvent) => {
